@@ -15,5 +15,9 @@ export class PostService {
     console.log("Push post", post);
     this._postStream.push(post);
   }
- 
+  
+  get postStream(): FirebaseListObservable<Post[]> {
+    return this._postStream;
+  }
+
 }

@@ -3,6 +3,7 @@ import { AngularFireAuth } from "angularfire2/auth";
 import * as firebase from 'firebase/app';
 import { Router } from "@angular/router";
 import { Observable } from "rxjs/Observable";
+import { AuthorService } from "app/services/author.service";
 
 @Injectable()
 export class AuthService {
@@ -12,7 +13,8 @@ export class AuthService {
   public photoUrlStream: Observable<string>;
   public _currentUserUid: string;
 
-  constructor(private afAuth: AngularFireAuth, private router: Router) {
+  constructor(private afAuth: AngularFireAuth, 
+    private router: Router, private authorService: AuthorService) {
     this.afAuth.authState.subscribe( (user: firebase.User) => { 
       if (user) {
         console.log("Signed in as ", user);
@@ -54,8 +56,10 @@ export class AuthService {
 
    signInWithGoogle(): void {
      this.afAuth.auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
-      .then( (user: firebase.User) => { 
-        this.router.navigate(['/']);
+      .then((result: any) => { 
+        const user: firebase.User = result.user;
+        this.router.navigate(['/']); 
+        this.authorService.updateAuthor(user.uid, user.displayName, user.photoURL);
       })
   }
 

@@ -1,7 +1,12 @@
 <div class="post" fxLayout="row" fxLayoutAlign="none stretch">
-  <img src="/assets/images/missing_photo.png" alt="Missing photo">
+  
+  <img *ngIf="post.photoUrl as photoUrl;else noPhotoTemplate" [src]="photoUrl" alt="Google Profile Photo">
+  <ng-template #noPhotoTemplate>
+    <img src="/assets/images/missing_photo.png" alt="Missing photo">
+  </ng-template>
+  
   <div fxFlex fxLayout="column">
-    <div class="author-name" fxFlex> Fangyuan</div>
-    <div class="post-body" fxFlex> body</div>
+    <div class="author-name" fxFlex>{{post.authorKey}}</div>
+    <div class="post-body" fxFlex>{{post.body}}</div>
   </div>
 </div>

@@ -44,6 +44,8 @@ import { CreatePostComponent } from './create-post/create-post.component';
 import { PostListComponent } from './post-list/post-list.component';
 import { PostComponent } from './post/post.component';
 import { PostService } from "app/services/post.service";
+import { ReversePipe } from './pipes/reverse.pipe';
+import { AuthorService } from "app/services/author.service";
 
 
 export const MaterialModules = [
@@ -80,7 +82,8 @@ export const MaterialModules = [
     MypostsComponent,
     CreatePostComponent,
     PostListComponent,
-    PostComponent
+    PostComponent,
+    ReversePipe
   ],
   imports: [
     BrowserModule,
@@ -97,6 +100,7 @@ export const MaterialModules = [
     AuthService,
     AuthGuard,
     PostService,
+    AuthorService,
   ],
   bootstrap: [AppComponent]
 })
