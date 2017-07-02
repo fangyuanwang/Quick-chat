@@ -8,6 +8,7 @@ import { Observable } from "rxjs/Observable";
 export class AuthService {
 
   public isSignedInStream: Observable<boolean>;
+  public displayNameStream: Observable<string>;
 
   constructor(private afAuth: AngularFireAuth, private router: Router) {
     this.afAuth.authState.subscribe( (user: firebase.User) => { 
@@ -18,10 +19,19 @@ export class AuthService {
       }
      });
 
-     this.isSignedInStream = this.afAuth.authState
-        .map<firebase.User, boolean>( (user: firebase.User) => { 
-          return user != null;
-      });
+    this.isSignedInStream = this.afAuth.authState
+      .map<firebase.User, boolean>( (user: firebase.User) => { 
+        return user != null;
+    });
+
+    this.displayNameStream = this.afAuth.authState
+    .map<firebase.User, string>( (user: firebase.User) => { 
+      if (user) {
+        return user.displayName;
+      } else {
+        return '';
+      }
+     })
    }
 
 
