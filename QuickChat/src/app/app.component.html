@@ -14,7 +14,7 @@
   </md-sidenav>
 
   <md-toolbar color="primary">
-    <button md-icon-button (click)="sidenav.toggle()">
+    <button md-icon-button (click)="sidenav.toggle()" *ngIf="authService.isSignedInStream | async">
       <md-icon>menu</md-icon>
     </button>
 
