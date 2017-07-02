@@ -10,13 +10,16 @@ export class AuthService {
   public isSignedInStream: Observable<boolean>;
   public displayNameStream: Observable<string>;
   public photoUrlStream: Observable<string>;
+  public _currentUserUid: string;
 
   constructor(private afAuth: AngularFireAuth, private router: Router) {
     this.afAuth.authState.subscribe( (user: firebase.User) => { 
       if (user) {
         console.log("Signed in as ", user);
+        this._currentUserUid = user.uid;
       } else {
         console.log("User not signed in");
+        this._currentUserUid = '';
       }
      });
 
@@ -43,6 +46,10 @@ export class AuthService {
         }
       });
    }
+
+  get currentUserUid(): string {
+    return this._currentUserUid;
+  }
 
 
    signInWithGoogle(): void {
