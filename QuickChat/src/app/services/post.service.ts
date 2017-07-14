@@ -3,20 +3,40 @@ import { Post, PostWithAuthor } from "app/models/post";
 import { AngularFireDatabase, FirebaseListObservable } from "angularfire2/database";
 import { Observable } from "rxjs/Observable";
 import 'rxjs/add/observable/combineLatest';
+import 'rxjs/add/operator/scan';
 import { AuthorService } from "app/services/author.service";
 import { Author } from "app/models/author";
+import { Subject } from "rxjs/Subject";
+import { BehaviorSubject } from "rxjs/BehaviorSubject";
+
+import * as firebase from 'firebase/app';
 
 @Injectable()
 export class PostService {
   readonly postsPath = "posts";
-  private _postStream: FirebaseListObservable<Post[]>;
+  readonly postBatchSize = 4;
 
   postWithAuthorStream: Observable<PostWithAuthor[]>;
+  private postIncrementStream: Subject<number>;
 
   constructor(private db: AngularFireDatabase, private authorService: AuthorService) {
-    this._postStream = this.db.list(this.postsPath);
+    this.postIncrementStream = new BehaviorSubject<number>(this.postBatchSize);
+    const numPostStream: Observable<number> = this.postIncrementStream
+      .scan<number>( (previousTotal: number, currenValue: number) => { 
+        return previousTotal + currenValue;
+     });
+
+    const postStream: Observable<Post[]> = numPostStream
+      .switchMap<number, Post[]>( (numPosts: number) => { 
+        return this.db.list(this.postsPath, {
+                query: {
+                  limitToLast: numPosts,
+                }
+              });
+     });
+
     this.postWithAuthorStream = Observable.combineLatest<PostWithAuthor[]>( 
-      this._postStream,
+      postStream,
       this.authorService.authorMapStream,
       (posts: Post[], authorMap: Map<string, Author>) => { 
         const postsWithAuthor: PostWithAuthor[] = [];
@@ -31,11 +51,10 @@ export class PostService {
 
   add(post: Post) {
     console.log("Push post", post);
-    this._postStream.push(post);
+    firebase.database().ref().child(this.postsPath).push(post);
   }
-  
-  // get postStream(): FirebaseListObservable<Post[]> {
-  //   return this._postStream;
-  // }
 
+  displayMorePosts() {
+    this.postIncrementStream.next(this.postBatchSize);
+  }
 }
