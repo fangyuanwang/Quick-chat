@@ -68,4 +68,8 @@ export class PostService {
     //alternative way
     // this.db.object(`/${this.postsPath}/${keyToRemove}`).remove();
   }
+
+  update(key: string, post: Post): void {
+    firebase.database().ref().child(this.postsPath).child(key).set(post);
+  }
 }
