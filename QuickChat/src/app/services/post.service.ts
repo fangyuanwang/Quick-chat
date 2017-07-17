@@ -14,10 +14,12 @@ import * as firebase from 'firebase/app';
 @Injectable()
 export class PostService {
   readonly postsPath = "posts";
-  readonly postBatchSize = 4;
+  readonly postBatchSize = 20;
 
   postWithAuthorStream: Observable<PostWithAuthor[]>;
   private postIncrementStream: Subject<number>;
+
+  public hideLoadMoreBtn = false;
 
   constructor(private db: AngularFireDatabase, private authorService: AuthorService) {
     this.postIncrementStream = new BehaviorSubject<number>(this.postBatchSize);
@@ -38,8 +40,10 @@ export class PostService {
     this.postWithAuthorStream = Observable.combineLatest<PostWithAuthor[]>( 
       postStream,
       this.authorService.authorMapStream,
-      (posts: Post[], authorMap: Map<string, Author>) => { 
+      numPostStream,
+      (posts: Post[], authorMap: Map<string, Author>, numPostsRequested: number) => { 
         const postsWithAuthor: PostWithAuthor[] = [];
+        this.hideLoadMoreBtn = numPostsRequested > posts.length;
         for (let post of posts) {
           const postWithAuthor = new PostWithAuthor(post);
           postWithAuthor.author = authorMap[post.authorKey];
@@ -54,7 +58,14 @@ export class PostService {
     firebase.database().ref().child(this.postsPath).push(post);
   }
 
-  displayMorePosts() {
+  displayMorePosts(): void {
     this.postIncrementStream.next(this.postBatchSize);
+  }
+
+  remove(keyToRemove: string): void {
+    firebase.database().ref().child(this.postsPath).child(keyToRemove).remove();
+    
+    //alternative way
+    // this.db.object(`/${this.postsPath}/${keyToRemove}`).remove();
   }
 }
